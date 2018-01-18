@@ -111,13 +111,38 @@ For more, see [Serverless CLI documentation for `deploy`](https://serverless.com
 For more, see [Serverless CLI documentation for `remove`](https://serverless.com/framework/docs/providers/aws/cli-reference/remove/)
 
 
+## Setting up a custom domain and SSL certificate
+
+Cloudfront, by default, will issue a random domain name; something like `abcde12345.cloudfront.net`. Thankfully, it's 
+possible to use your own domain name (e.g. cdn.example.com).
+
+We can do this with a few changes to `serverless.yml` and then a new deployment:
+1. In the environment variables section, uncomment `CERT_DOMAIN`, `CERT_VALIDATION_DOMAIN`, and `CDN_ARN`
+1. Change `CERT_DOMAIN`. This will be the domain(s) that you want have SSL certs for. e.g. `*.example.com` or `subdomain.example.com`
+1. Change `CERT_VALIDATION_DOMAIN`. This is the root domain that you will receive a validation email at. Domain must match the above TLD. e.g. `example.com`
+1. In the Resources section, uncomment the `CDNCert` section, as well as the `Aliases` and `ViewerCertificate` options under the `MediaCDN` section
+1. `sls deploy`
+
+During this step, Amazon will send an email to you with a link for you to click to validate your domain. If your 
+`CERT_VALIDATION_DOMAIN` is `example.com`, they will send a validation email to all of the following addresses:
+- administrator@example.com
+- hostmaster@example.com
+- postmaster@example.com
+- webmaster@example.com
+- admin@example.com
+
+**NOTE:** The serverless deployment will hang until you validate your domain, so keep that in mind if you need to
+coordinate with other people during this step.
+
+After the domain has been validated, the deployment will continue as normal. Your Cloudfront distribution will restart
+during this process, so it will probably take a number of minutes for the deployment to complete.
+
+You should now be able to use your shiny new `cdn.example.com` domain!
+
+
 ### AWS Services Used
 
 - Amazon API Gateway
 - Amazon Cloudfront
 - Amazon S3
 - AWS Lambda 
-
-Coming soon:
-
-- AWS Certificate Manager w/ custom domain name
