@@ -23,7 +23,6 @@
     "jimp": "^0.2.28"
   },
   "devDependencies": {
-    "serverless-offline": "^3.16.0",
-    "serverless-s3-local": "^0.2.10"
+    "serverless-offline": "^3.16.0"
   }
 }
