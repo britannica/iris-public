@@ -1,8 +1,0 @@
-{
-  "name": "iris",
-  "version": "0.0.1",
-  "dependencies": {
-    "aws-sdk": "^2.142.0",
-    "sharp": "^0.18.4"
-  }
-}

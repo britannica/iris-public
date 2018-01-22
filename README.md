@@ -8,24 +8,15 @@ CDN/Media Server infrastructure with the capability of resizing images on the fl
 
 ### Usage
 
-There are three different types of URLs you can build to create your dynamically sized images:
-
 | Type                 | URL                            |
 | -------------------- | ------------------------------ |
 | Original             | /path/to/image.jpg             |
-| Rectangle            | /300x250/path/to/image.jpg     |
-| Rectangle w/ command | /300x250@max/path/to/image.jpg |
+| Resized              | /300x250/path/to/image.jpg     |
 
 **Anatomy of the URL**
 
-`/{width}x{height}@{command}/{path_to_original_image}`
+`/{width}x{height}/{path_to_original_image}`
 
-**Valid commands**
-
-| Command | Description |   |
-| ------- | ----------- | - |
-| `max`   | Preserving aspect ratio, resize the image to be as large as possible while ensuring its dimensions are less than or equal to the `width` and `height` specified.    | [Sharp documentation on `max`](http://sharp.dimens.io/en/stable/api-resize/#max) |
-| `min`   | Preserving aspect ratio, resize the image to be as small as possible while ensuring its dimensions are greater than or equal to the `width` and `height` specified. | [Sharp documentation on `min`](http://sharp.dimens.io/en/stable/api-resize/#min) |
 
 **Limitations**
 
@@ -38,7 +29,6 @@ There are three different types of URLs you can build to create your dynamically
 
 - [Node](https://nodejs.org/en/)
 - [Serverless](https://serverless.com/)
-- [Docker](https://docs.docker.com/engine/installation/)
 
 **Important:** Be sure to set up proper [AWS credentials](https://serverless.com/framework/docs/providers/aws/guide/credentials/) 
 on your machine, otherwise the Serverless deploy commands will fail.
@@ -48,11 +38,9 @@ on your machine, otherwise the Serverless deploy commands will fail.
 
 **1. Build the Lambda function**
 
-The Lambda function uses sharp for image resizing which requires native extensions. In order to run on Lambda, it must
-be packaged on Amazon Linux. We will use Docker to download Amazon Linux, install Node.js and developer tools, and build
-the extensions.
+The Lambda function uses Jimp for image resizing. Let's package up the function in a .zip file.
 
-Run `make dist`
+Run `serverless package`
 
 **2. Provision AWS infrastructure with Serverless**
 
@@ -73,7 +61,7 @@ Next, we need to manually upload `index.html`, `404.html`, and `favicon.ico` to 
 1. In the upper left, click the "Upload" button
 1. Upload the files inside of the `./etc/s3-default-documents` directory. **Be sure to make these public!**
 
-Automating this process is on the road map.
+This only needs to happen once.
 
 **That's it!**
 

@@ -13,27 +13,39 @@
 
 service: iris
 
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    stage: local
+
 provider:
   name: aws
+  stage: ${opt:stage, 'dev'}
   runtime: nodejs6.10
   memorySize: 1536
   environment:
-    API_GATEWAY: { "Fn::Join": ["", [{ "Ref": "ApiGatewayRestApi" }, ".execute-api.${self:provider.region}.amazonaws.com"]]}
-    BUCKET: { "Ref": "MediaServer" }
-    BUCKET_DOMAIN: { "Fn::Join": ["", [{ "Ref": "MediaServer" }, ".s3-website-${self:provider.region}.amazonaws.com"]]}
-    CLOUDFRONT_URL: { "Fn::Join": ["", ["https://", { "Fn::GetAtt": ["MediaCDN", "DomainName"] }]]}
-    ERROR_DOCUMENT: 404.html
-    CDN_CERT_ARN: { "Ref": "CDNCert" }
+
+    # Resources
+
+    API_GATEWAY:    ${file(config/${self:provider.stage}.json):resources.API_GATEWAY}
+    BUCKET_DOMAIN:  ${file(config/${self:provider.stage}.json):resources.BUCKET_DOMAIN}
+    CERT_ARN:       ${file(config/${self:provider.stage}.json):resources.CERT_ARN}
+    CERT_DOMAIN:    ${file(config/${self:provider.stage}.json):resources.CERT_DOMAIN}
+    CERT_TLD:       ${file(config/${self:provider.stage}.json):resources.CERT_TLD}
+
+    # Handler
+
+    BUCKET:         ${file(config/${self:provider.stage}.json):handler.BUCKET}
+    CLOUDFRONT_URL: ${file(config/${self:provider.stage}.json):handler.CLOUDFRONT_URL}
+    ERROR_DOCUMENT: ${file(config/${self:provider.stage}.json):handler.ERROR_DOCUMENT}
 
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - "s3:*"
-      #Resource: { "Fn::Join": ["", ["arn:aws:s3:::", { "Ref": "MediaServer" }]]}
       Resource: "*"
-
-package:
-  artifact: dist/iris.zip
 
 functions:
   resizeImage:
@@ -46,10 +58,10 @@ resources:
     CDNCert:
       Type: AWS::CertificateManager::Certificate
       Properties:
-        DomainName: amedia.britannica.com
+        DomainName: ${self:provider.environment.CERT_DOMAIN}
         DomainValidationOptions:
-          - DomainName: amedia.britannica.com
-            ValidationDomain: britannica.com
+          - DomainName: ${self:provider.environment.CERT_DOMAIN}
+            ValidationDomain: ${self:provider.environment.CERT_TLD}
     MediaServer:
       Type: AWS::S3::Bucket
       DeletionPolicy: Retain
@@ -79,10 +91,6 @@ resources:
                 OriginProtocolPolicy: http-only
           Enabled: 'true'
           DefaultCacheBehavior:
-#            AllowedMethods:
-#            - GET
-#            CachedMethods:
-#            - GET
             Compress: 'true'
             DefaultTTL: 0
             ForwardedValues:
@@ -90,7 +98,7 @@ resources:
             TargetOriginId: MediaServerS3Origin
             ViewerProtocolPolicy: redirect-to-https
           Aliases:
-            - amedia.britannica.com
+            - ${self:provider.environment.CERT_DOMAIN}
           ViewerCertificate:
-            AcmCertificateArn: ${self:provider.environment.CDN_CERT_ARN}
+            AcmCertificateArn: ${self:provider.environment.CERT_ARN}
             SslSupportMethod: sni-only

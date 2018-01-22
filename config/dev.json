@@ -1,0 +1,14 @@
+{
+  "resources": {
+    "API_GATEWAY": { "Fn::Join": ["", [{ "Ref": "ApiGatewayRestApi" }, ".execute-api.${self:provider.region}.amazonaws.com"]]},
+    "BUCKET_DOMAIN": { "Fn::Join": ["", [{ "Ref": "MediaServer" }, ".s3-website-${self:provider.region}.amazonaws.com"]]},
+    "CERT_ARN": { "Ref": "CDNCert" },
+    "CERT_DOMAIN": "amedia.britannica.com",
+    "CERT_TLD": "britannica.com"
+  },
+  "handler": {
+    "BUCKET": { "Ref": "MediaServer" },
+    "CLOUDFRONT_URL": "https://amedia.britannica.com",
+    "ERROR_DOCUMENT": "404.html"
+  }
+}
