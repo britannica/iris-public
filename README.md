@@ -65,19 +65,6 @@ This only needs to happen once.
 
 **That's it!**
 
-We now have all of our AWS infrastructure in place for our media server, and the first version of the Resize Image
-function deployed.
-
-**Deploying changes to Lambda functions**
-
-The majority of deployments will be in maintaining the functions deployed to Lambda. Whenever changes are made to files
-inside of the `./lambda` directory, we will need to repackage and deploy the changes.
-
-This can be done by running the following commands:
-
-1. `make dist`
-1. `serverless deploy --package`
-
 
 ### Serverless CLI Reference
 
@@ -92,7 +79,7 @@ https://serverless.com/framework/docs/providers/aws/cli-reference/
 
 For more, see [Serverless CLI documentation for `deploy`](https://serverless.com/framework/docs/providers/aws/cli-reference/deploy/)
 
-**Remove provisioned infrastructure**
+**Remove the deployed service**
 
 `serverless remove`
 
@@ -106,8 +93,8 @@ possible to use your own domain name (e.g. cdn.example.com).
 
 We can do this with a few changes to `serverless.yml` and then a new deployment:
 1. In the environment variables section, uncomment `CERT_DOMAIN`, `CERT_VALIDATION_DOMAIN`, and `CDN_ARN`
-1. Change `CERT_DOMAIN`. This will be the domain(s) that you want have SSL certs for. e.g. `*.example.com` or `subdomain.example.com`
-1. Change `CERT_VALIDATION_DOMAIN`. This is the root domain that you will receive a validation email at. Domain must match the above TLD. e.g. `example.com`
+1. Change `CERT_DOMAIN` in your config .json file. This will be the domain that you want secured with a certificate. e.g. `subdomain.example.com`
+1. Change `CERT_VALIDATION_DOMAIN` in your config .json file. This is the TLD domain that you will receive a validation email at. Must match the above TLD. e.g. `example.com`
 1. In the Resources section, uncomment the `CDNCert` section, as well as the `Aliases` and `ViewerCertificate` options under the `MediaCDN` section
 1. `sls deploy`
 
