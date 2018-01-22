@@ -34,32 +34,25 @@ CDN/Media Server infrastructure with the capability of resizing images on the fl
 on your machine, otherwise the Serverless deploy commands will fail.
 
 
-### Setup
+### Deployments
 
-**1. Build the Lambda function**
+**1. Provision resources and deploy your service**
 
-The Lambda function uses Jimp for image resizing. Let's package up the function in a .zip file.
-
-Run `serverless package`
-
-**2. Provision AWS infrastructure with Serverless**
-
-The Serverless Framework was designed to provision your AWS Lambda Functions, Events and infrastructure Resources safely
-and quickly. This will take several minutes. Don't worry if it seems to hang, particularly during the Cloudfront setup.
+The `sls deploy` command deploys your entire service via CloudFormation. Run this command when you have made infrastructure changes (i.e., you edited serverless.yml). Use `serverless deploy function -f myFunction` when you have made code changes and you want to quickly upload your updated code to AWS Lambda or just change function configuration.
 
 Run `serverless deploy`
 
 *Note:* You can specify a stage while deploying by using the `--stage` flag. e.g. `serverless deploy --stage production`.
 Defaults to `dev` if no `--stage` is set.
 
-**3. Add IndexDocument and ErrorDocument to S3**
+**2. Add IndexDocument and ErrorDocument to S3**
 
 Next, we need to manually upload `index.html`, `404.html`, and `favicon.ico` to our newly created S3 bucket:
 
 1. Go to the [S3 Console](https://s3.console.aws.amazon.com/s3/home)
 1. Open our `iris-{stage}-mediaserver-xxxxx` bucket
 1. In the upper left, click the "Upload" button
-1. Upload the files inside of the `./etc/s3-default-documents` directory. **Be sure to make these public!**
+1. Upload the files inside of the `./config/s3-default-documents` directory. **Be sure to make these public!**
 
 This only needs to happen once.
 
