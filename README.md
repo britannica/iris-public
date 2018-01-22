@@ -18,11 +18,12 @@ CDN/Media Server infrastructure with the capability of resizing images on the fl
 `/{width}x{height}/{path_to_original_image}`
 
 
-**Limitations**
+**Caveats**
 
 - `width` must be less than or equal to 1920
 - `height` must be less than or equal to 1080
 - Decimals are not allowed in the `height` and `width`
+- Resizing of GIFs is not supported. Attempts to resize a GIF will return the original image.
 
 
 ### Requirements
@@ -30,19 +31,21 @@ CDN/Media Server infrastructure with the capability of resizing images on the fl
 - [Node](https://nodejs.org/en/)
 - [Serverless](https://serverless.com/)
 
-**Important:** Be sure to set up proper [AWS credentials](https://serverless.com/framework/docs/providers/aws/guide/credentials/) 
-on your machine, otherwise the Serverless deploy commands will fail.
+
+### Local development
+
+1. `npm install`
+1. `npm start`
 
 
 ### Deployments
 
-**1. Provision resources and deploy your service**
+**1. `sls deploy`**
 
-The `sls deploy` command deploys your entire service via CloudFormation. Run this command when you have made infrastructure changes (i.e., you edited serverless.yml). Use `serverless deploy function -f myFunction` when you have made code changes and you want to quickly upload your updated code to AWS Lambda or just change function configuration.
+Be sure to set up proper [AWS credentials](https://serverless.com/framework/docs/providers/aws/guide/credentials/) 
+on your machine, otherwise the Serverless deploy commands will fail.
 
-Run `serverless deploy`
-
-*Note:* You can specify a stage while deploying by using the `--stage` flag. e.g. `serverless deploy --stage production`.
+You can specify a stage while deploying by using the `--stage` flag. e.g. `serverless deploy --stage production`.
 Defaults to `dev` if no `--stage` is set.
 
 **2. Add IndexDocument and ErrorDocument to S3**
@@ -54,7 +57,7 @@ Next, we need to manually upload `index.html`, `404.html`, and `favicon.ico` to 
 1. In the upper left, click the "Upload" button
 1. Upload the files inside of the `./config/s3-default-documents` directory. **Be sure to make these public!**
 
-This only needs to happen once.
+This step only needs to happen once.
 
 **That's it!**
 
