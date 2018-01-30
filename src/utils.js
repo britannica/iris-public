@@ -14,8 +14,8 @@ const utils = {
   /**
    * Redirect the HTTP response
    *
-   * todo: validate location
-   * todo: validate statusCode
+   * todo: validate location as url
+   * todo: validate statusCode as number and redirect
    *
    * @param {Function}  callback      The lambda callback
    * @param {String}    location      URL to redirect to
