@@ -92,7 +92,10 @@ function resizeImage(key, callback) {
         case Jimp.MIME_JPEG:
           Jimp.read(data.Body)
             .then((image) => {
-              image.scaleToFit(width, height);
+              if (image.bitmap.height > height || image.bitmap.width > width) {
+                image.scaleToFit(width, height);
+              }
+
               image.quality(60);
               image.getBuffer(mimeType, (err, buffer) => resolve({ buffer, mimeType }));
             });
