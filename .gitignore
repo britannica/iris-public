@@ -11,5 +11,8 @@ jspm_packages
 # OS
 .DS_Store
 
+# Tests
+.nyc_output
+
 # Remove this after figuring out how to obfuscate local AWS resources
 config/local.json
