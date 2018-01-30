@@ -18,7 +18,7 @@ describe('Utils', () => {
       assert.strictEqual(mockCallback.called, true);
     });
 
-    it('should return `null` as the first argument', () => {
+    it('should return `null` as the first argument of the callback', () => {
       redirectResponse(mockCallback, 'sesame street');
 
       assert.strictEqual(mockCallback.args[0][0], null);
@@ -36,13 +36,13 @@ describe('Utils', () => {
       assert.strictEqual(mockCallback.args[0][1].statusCode, 302);
     });
 
-    it('should return a Cache-Control header value of `null`', () => {
+    it('should return the callback with a Cache-Control header value of `null`', () => {
       redirectResponse(mockCallback, 'sesame street', 301);
 
       assert.strictEqual(mockCallback.args[0][1].headers['Cache-Control'], null);
     });
 
-    it('should return a Cache-Control header value of `max-age=604800`', () => {
+    it('should return the callback with a Cache-Control header value of `max-age=604800`', () => {
       redirectResponse(mockCallback, 'sesame street');
 
       assert.strictEqual(mockCallback.args[0][1].headers['Cache-Control'], 'max-age=604800');
