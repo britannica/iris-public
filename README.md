@@ -37,6 +37,10 @@ CDN/Media Server infrastructure with the capability of resizing images on the fl
 1. `npm install`
 1. `npm start`
 
+This boots up an instance of `serverless-offline` at `http://localhost:3000`. You can test the resize function by using 
+a url like `http://localhost:3000/resizeImage?key=200x200/40/154340-050-3C5A71CD.jpg`. In that url, `200x200` are the dimensions you
+are testing and `/40/154340-050-3C5A71CD.jpg` is the path to the original image you are testing.
+
 
 ### Deployments
 
