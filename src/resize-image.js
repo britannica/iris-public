@@ -96,7 +96,7 @@ function resizeImage(key) {
                   image.scaleToFit(width, height);
                 }
 
-                image.quality(60);
+                image.quality(50);
                 image.getBuffer(mimeType, (err, buffer) => resolve({ buffer, mimeType }));
               });
 
