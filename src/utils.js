@@ -6,9 +6,6 @@ const utils = {
   AmazonError: {
     NO_SUCH_KEY: 'NoSuchKey',
   },
-  RedirectLocation: {
-    NOT_FOUND: `${CLOUDFRONT_URL}/${ERROR_DOCUMENT}`,
-  },
 
 
   /**
@@ -17,23 +14,22 @@ const utils = {
    * todo: validate location as url
    * todo: validate statusCode as number and redirect
    *
-   * @param {Function}  callback      The lambda callback
-   * @param {String}    location      URL to redirect to
+   * @param {String}    filename      URL to redirect to
    * @param {Number}    [statusCode]  HTTP status code; Default = 302; Temporary redirect
    * @returns {Object}
    */
 
-  redirectResponse(callback, location, statusCode = 302) {
+  buildResponse(filename = ERROR_DOCUMENT, statusCode = 302) {
     const cacheControl = statusCode === 302 ? 'max-age=604800' : null;
 
-    return callback(null, {
+    return {
       statusCode,
       headers: {
         'Cache-Control': cacheControl,
-        'Location': location,
+        'Location': `${CLOUDFRONT_URL}/${filename}`,
       },
       body: '',
-    });
+    };
   },
 
 

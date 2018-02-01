@@ -10,5 +10,6 @@ const resizeImage = require('./src/resize-image');
  */
 
 module.exports.resizeImage = (event, context, callback) => {
-  resizeImage(event.queryStringParameters.key, callback);
+  resizeImage(event.queryStringParameters.key)
+    .then(response => callback(null, response));
 };

@@ -2,54 +2,42 @@
 const assert = require('chai').assert;
 const sinon = require('sinon');
 const utils = require('./utils');
-const { redirectResponse, isValidCommand } = utils;
+const { buildResponse, isValidCommand } = utils;
 
-describe('Utils', () => {
-  describe('redirectResponse', () => {
-    const mockCallback = sinon.stub();
+describe('utils', () => {
+  describe('#buildResponse', () => {
+    let response = {};
 
     beforeEach(() => {
-      mockCallback.resetHistory();
-    });
-
-    it('should call the lambda `callback` function', () => {
-      redirectResponse(mockCallback, 'sesame street');
-
-      assert.strictEqual(mockCallback.called, true);
-    });
-
-    it('should return `null` as the first argument of the callback', () => {
-      redirectResponse(mockCallback, 'sesame street');
-
-      assert.strictEqual(mockCallback.args[0][0], null);
+      response = {};
     });
 
     it('should return the callback with `statusCode: 301`', () => {
-      redirectResponse(mockCallback, 'sesame street', 301);
+      response = buildResponse('sesame street', 301);
 
-      assert.strictEqual(mockCallback.args[0][1].statusCode, 301);
+      assert.strictEqual(response.statusCode, 301);
     });
 
     it('should return the callback with `statusCode: 302`', () => {
-      redirectResponse(mockCallback, 'sesame street');
+      response = buildResponse('sesame street');
 
-      assert.strictEqual(mockCallback.args[0][1].statusCode, 302);
+      assert.strictEqual(response.statusCode, 302);
     });
 
     it('should return the callback with a Cache-Control header value of `null`', () => {
-      redirectResponse(mockCallback, 'sesame street', 301);
+      response = buildResponse('sesame street', 301);
 
-      assert.strictEqual(mockCallback.args[0][1].headers['Cache-Control'], null);
+      assert.strictEqual(response.headers['Cache-Control'], null);
     });
 
     it('should return the callback with a Cache-Control header value of `max-age=604800`', () => {
-      redirectResponse(mockCallback, 'sesame street');
+      response = buildResponse('sesame street');
 
-      assert.strictEqual(mockCallback.args[0][1].headers['Cache-Control'], 'max-age=604800');
+      assert.strictEqual(response.headers['Cache-Control'], 'max-age=604800');
     });
   });
 
-  describe('isValidCommand', () => {
+  describe('#isValidCommand', () => {
     it('`any` should return `false`', () => {
       assert.strictEqual(isValidCommand('any'), false);
     });
