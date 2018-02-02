@@ -85,7 +85,6 @@ function resizeImage(key) {
     S3.getObject({ Bucket: BUCKET, Key: imagePath })
       .promise()
       .then(data => new Promise((resolve, reject) => {
-        console.log('testing');
         const mimeType = data.ContentType;
 
         switch (mimeType) {
@@ -96,7 +95,7 @@ function resizeImage(key) {
                   image.scaleToFit(width, height);
                 }
 
-                image.quality(50);
+                image.quality(40);
                 image.getBuffer(mimeType, (err, buffer) => resolve({ buffer, mimeType }));
               });
 
