@@ -1,10 +1,16 @@
 
 const AWS = require('aws-sdk');
-const Jimp = require('jimp');
+const sharp = require('sharp');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
 const utils = require('./utils');
 const { buildResponse, isValidCommand, AmazonError } = utils;
 const BUCKET = process.env.BUCKET;
+
+const MimeType = {
+  GIF: 'image/gif',
+  JPEG: 'image/jpeg',
+  PNG: 'image/png',
+};
 
 
 /**
@@ -18,7 +24,7 @@ const BUCKET = process.env.BUCKET;
  */
 
 function resizeImage(key) {
-  return new Promise((resolve) => {
+  return new Promise((returnToHandler) => {
     const rectangle = key.match(/(\d+)x(\d+)\/(.*)/);
     const rectangleWithCommand = key.match(/(\d+)x(\d+)@(.*?)\/(.*)/);
 
@@ -51,7 +57,7 @@ function resizeImage(key) {
       if (!isValidCommand(command)) {
         console.log('Invalid command:', command);
 
-        return resolve(buildResponse());
+        return returnToHandler(buildResponse());
       }
     }
 
@@ -61,7 +67,7 @@ function resizeImage(key) {
     else {
       console.log('Invalid key:', key);
 
-      return resolve(buildResponse());
+      return returnToHandler(buildResponse());
     }
 
 
@@ -70,13 +76,13 @@ function resizeImage(key) {
     if (width > 1920) {
       console.log('Dimensions too large:', width, height);
 
-      return resolve(buildResponse());
+      return returnToHandler(buildResponse());
     }
 
     if (height > 1080) {
       console.log('Dimensions too large:', width, height);
 
-      return resolve(buildResponse());
+      return returnToHandler(buildResponse());
     }
 
 
@@ -84,27 +90,27 @@ function resizeImage(key) {
 
     S3.getObject({ Bucket: BUCKET, Key: imagePath })
       .promise()
-      .then(data => new Promise((resolve, reject) => {
+      .then(data => new Promise((resolve) => {
+        const image = sharp(data.Body);
         const mimeType = data.ContentType;
 
         switch (mimeType) {
-          case Jimp.MIME_JPEG:
-            Jimp.read(data.Body)
-              .then((image) => {
-                if (image.bitmap.height > height || image.bitmap.width > width) {
-                  image.scaleToFit(width, height);
-                }
+          case MimeType.JPEG:
+            return image
+              .withoutEnlargement()
+              .resize(width, height)
+              .max()
+              .toFormat('jpg')
+              .jpeg({ quality: 60 })
+              .toBuffer()
+              .then(buffer => resolve({ buffer, mimeType }));
 
-                image.quality(40);
-                image.getBuffer(mimeType, (err, buffer) => resolve({ buffer, mimeType }));
-              });
-
-            break;
-          case Jimp.MIME_GIF:
-            // Redirect GIFs back to their original version, ignoring any resizing
+          case MimeType.GIF:
+            // Pass control back to the Lambda handler
+            // Redirect GIFs back to their original version without resizing
             // todo: add animation detection https://www.npmjs.com/package/animated-gif-detector
 
-            return resolve(buildResponse(imagePath));
+            return returnToHandler(buildResponse(imagePath));
         }
       }))
 
@@ -123,7 +129,7 @@ function resizeImage(key) {
 
       // Return a permanent redirect to the new image
 
-      .then(() => resolve(buildResponse(key, 301)))
+      .then(() => returnToHandler(buildResponse(key, 301)))
 
 
       // Wah wah...
@@ -133,12 +139,12 @@ function resizeImage(key) {
           // Redirect to the generic "Not Found" page if the original image doesn't exist in S3
 
           case AmazonError.NO_SUCH_KEY:
-            return resolve(buildResponse());
+            return returnToHandler(buildResponse());
 
           default:
             console.error(err);
 
-            return resolve(buildResponse());
+            return returnToHandler(buildResponse());
         }
       });
   });

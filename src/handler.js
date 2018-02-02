@@ -1,5 +1,5 @@
 
-const resizeImage = require('./src/resize-image');
+const resizeImage = require('./resize-image');
 
 /**
  * The resize function to be deployed to Lambda

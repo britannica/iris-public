@@ -19,6 +19,7 @@ plugins:
 custom:
   serverless-offline:
     stage: local
+    location: src
 
 provider:
   name: aws
@@ -46,6 +47,9 @@ provider:
       Action:
         - "s3:*"
       Resource: "*"
+
+package:
+  artifact: dist/iris.zip
 
 functions:
   resizeImage:
