@@ -20,8 +20,8 @@ CDN/Media Server infrastructure with the capability of resizing images on the fl
 
 **Caveats**
 
-- `width` must be less than or equal to 1920
-- `height` must be less than or equal to 1080
+- Maximum `width` is 1920
+- Maximum `height` is 1080
 - Decimals are not allowed in the `height` and `width`
 - Resizing of GIFs is not supported. Attempts to resize a GIF will return the original image.
 
@@ -44,15 +44,26 @@ are testing and `/40/154340-050-3C5A71CD.jpg` is the path to the original image 
 
 ### Deployments
 
-**1. `sls deploy`**
+**1. Build the Lambda function**
+
+The Lambda function uses sharp for image resizing which requires native extensions. In order to run on Lambda, it must be packaged on Amazon Linux. We will use Docker to download Amazon Linux, install Node.js and developer tools, and build the extensions.
+
+Run `make dist`
+
+**2. Deploy the function and provision any necessary infrastructure**
 
 Be sure to set up proper [AWS credentials](https://serverless.com/framework/docs/providers/aws/guide/credentials/) 
 on your machine, otherwise the Serverless deploy commands will fail.
 
-You can specify a stage while deploying by using the `--stage` flag. e.g. `serverless deploy --stage production`.
-Defaults to `dev` if no `--stage` is set.
+Run `sls deploy`
 
-**2. Add IndexDocument and ErrorDocument to S3**
+During the first deploy, Serverless will provision whatever resources you have listed in your serverless.yml. This will take several minutes. If you're using a custom domain name, see [Setting up a custom domain and SSL certificate](#setting-up-a-custom-domain-and-ssl-certificate) section.
+
+Subsequent deploys will go faster since Serverless will only be uploading your updated .zip file (created by `make dist`).
+
+You can specify a stage while deploying by using the `--stage` flag. e.g. `serverless deploy --stage production`. Defaults to `dev` if no `--stage` is set.
+
+**3. Add IndexDocument and ErrorDocument to S3**
 
 Next, we need to manually upload `index.html`, `404.html`, and `favicon.ico` to our newly created S3 bucket:
 
@@ -106,7 +117,7 @@ During this step, Amazon will send an email to you with a link for you to click 
 - webmaster@example.com
 - admin@example.com
 
-**NOTE:** The serverless deployment will hang until you validate your domain, so keep that in mind if you need to
+**IMPORTANT!:** The serverless deployment will hang until you validate your domain, so keep that in mind if you need to
 coordinate with other people during this step.
 
 After the domain has been validated, the deployment will continue as normal. Your Cloudfront distribution will restart
