@@ -1,6 +1,5 @@
 
 const assert = require('chai').assert;
-const sinon = require('sinon');
 const utils = require('./utils');
 const { buildResponse, isValidCommand } = utils;
 

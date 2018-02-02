@@ -106,6 +106,7 @@ function resizeImage(key) {
               .then(buffer => resolve({ buffer, mimeType }));
 
           case MimeType.GIF:
+          default:
             // Pass control back to the Lambda handler
             // Redirect GIFs back to their original version without resizing
             // todo: add animation detection https://www.npmjs.com/package/animated-gif-detector
@@ -135,17 +136,9 @@ function resizeImage(key) {
       // Wah wah...
 
       .catch((err) => {
-        switch (err.code) {
-          // Redirect to the generic "Not Found" page if the original image doesn't exist in S3
+        console.log(err);
 
-          case AmazonError.NO_SUCH_KEY:
-            return returnToHandler(buildResponse());
-
-          default:
-            console.error(err);
-
-            return returnToHandler(buildResponse());
-        }
+        return returnToHandler(buildResponse());
       });
   });
 }
