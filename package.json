@@ -5,7 +5,8 @@
   "main": "handler.js",
   "scripts": {
     "test": "nyc --check-coverage --lines 95 --reporter=text mocha **/*.test.js",
-    "start": "rm -r src/node_modules && cd src && npm install && cd .. && sls offline start --stage local"
+    "start": "npm run rebuild && sls offline start --stage local",
+    "rebuild": "rm -r src/node_modules && cd src && npm install"
   },
   "repository": {
     "type": "git",
