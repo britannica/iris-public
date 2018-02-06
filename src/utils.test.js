@@ -1,5 +1,4 @@
 
-const assert = require('chai').assert;
 const utils = require('./utils');
 const { buildResponse, isValidCommand } = utils;
 
@@ -11,42 +10,48 @@ describe('utils', () => {
       response = {};
     });
 
-    it('should return the callback with `statusCode: 301`', () => {
+    test('should return the callback with `statusCode: 301`', () => {
       response = buildResponse('sesame street', 301);
 
-      assert.strictEqual(response.statusCode, 301);
+      expect(response.statusCode).toBe(301);
     });
 
-    it('should return the callback with `statusCode: 302`', () => {
+    test('should return the callback with `statusCode: 302`', () => {
       response = buildResponse('sesame street');
 
-      assert.strictEqual(response.statusCode, 302);
+      expect(response.statusCode).toBe(302);
     });
 
-    it('should return the callback with a Cache-Control header value of `null`', () => {
-      response = buildResponse('sesame street', 301);
+    test(
+      'should return the callback with a Cache-Control header value of `null`',
+      () => {
+        response = buildResponse('sesame street', 301);
 
-      assert.strictEqual(response.headers['Cache-Control'], null);
-    });
+        expect(response.headers['Cache-Control']).toBe(null);
+      }
+    );
 
-    it('should return the callback with a Cache-Control header value of `max-age=604800`', () => {
-      response = buildResponse('sesame street');
+    test(
+      'should return the callback with a Cache-Control header value of `max-age=604800`',
+      () => {
+        response = buildResponse('sesame street');
 
-      assert.strictEqual(response.headers['Cache-Control'], 'max-age=604800');
-    });
+        expect(response.headers['Cache-Control']).toBe('max-age=604800');
+      }
+    );
   });
 
   describe('#isValidCommand', () => {
-    it('`max` should return `true`', () => {
-      assert.strictEqual(isValidCommand('max'), true);
+    test('`max` should return `true`', () => {
+      expect(isValidCommand('max')).toBe(true);
     });
 
-    it('`crop` should return `false`', () => {
-      assert.strictEqual(isValidCommand('crop'), false);
+    test('`crop` should return `false`', () => {
+      expect(isValidCommand('crop')).toBe(false);
     });
 
-    it('`greyscale` should return `false`', () => {
-      assert.strictEqual(isValidCommand('greyscale'), false);
+    test('`greyscale` should return `false`', () => {
+      expect(isValidCommand('greyscale')).toBe(false);
     });
   });
 });
