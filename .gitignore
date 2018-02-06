@@ -15,5 +15,8 @@ dist
 # Tests
 .nyc_output
 
+# Environment
+.env
+
 # Remove this after figuring out how to obfuscate local AWS resources
 config/local.json
