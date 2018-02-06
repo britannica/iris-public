@@ -37,8 +37,8 @@ describe('utils', () => {
   });
 
   describe('#isValidCommand', () => {
-    it('`any` should return `false`', () => {
-      assert.strictEqual(isValidCommand('any'), false);
+    it('`max` should return `true`', () => {
+      assert.strictEqual(isValidCommand('max'), true);
     });
 
     it('`crop` should return `false`', () => {

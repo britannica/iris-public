@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const sharp = require('sharp');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
 const utils = require('./utils');
-const { buildResponse, isValidCommand, AmazonError } = utils;
+const { buildResponse, isValidCommand } = utils;
 const BUCKET = process.env.BUCKET;
 
 const MimeType = {
@@ -15,6 +15,9 @@ const MimeType = {
 
 /**
  * Resize an image based on the values of the `key`
+ *
+ * `command` is a sharp command, defaults to `max`
+ * http://sharp.pixelplumbing.com/en/stable/api-resize/
  * 
  * todo: ensure height and width are numbers
  * todo: disallow decimals
@@ -26,12 +29,12 @@ const MimeType = {
 function resizeImage(key) {
   return new Promise((returnToHandler) => {
     const rectangle = key.match(/(\d+)x(\d+)\/(.*)/);
-    const rectangleWithCommand = key.match(/(\d+)x(\d+)@(.*?)\/(.*)/);
+    const rectangleWithCommand = key.match(/(\d+)x(\d+):(.*?)\/(.*)/);
 
     let height;
     let width;
     let imagePath;
-    let command;
+    let command = 'max';
 
 
     // 100x100/path/to/image
@@ -96,10 +99,17 @@ function resizeImage(key) {
 
         switch (mimeType) {
           case MimeType.JPEG:
-            return image
+            image
               .withoutEnlargement()
-              .resize(width, height)
-              .max()
+              .resize(width, height);
+
+            switch (command) {
+              case 'max':
+              default:
+                image[command]();
+            }
+
+            return image
               .toFormat('jpg')
               .jpeg({ quality: 60 })
               .toBuffer()

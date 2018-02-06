@@ -3,9 +3,6 @@ const CLOUDFRONT_URL = process.env.CLOUDFRONT_URL;
 const ERROR_DOCUMENT = process.env.ERROR_DOCUMENT;
 
 const utils = {
-  AmazonError: {
-    NO_SUCH_KEY: 'NoSuchKey',
-  },
 
 
   /**
@@ -41,7 +38,7 @@ const utils = {
    */
 
   isValidCommand(command) {
-    return [].indexOf(command) !== -1;
+    return ['max'].indexOf(command) !== -1;
   }
 };
 
