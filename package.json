@@ -19,7 +19,9 @@
     "url": "https://github.com/britannica/iris/issues"
   },
   "homepage": "https://github.com/britannica/iris#readme",
-  "dependencies": {},
+  "dependencies": {
+    "winston": "^2.4.0"
+  },
   "devDependencies": {
     "chai": "^4.1.2",
     "mocha": "^5.0.0",

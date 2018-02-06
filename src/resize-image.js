@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const sharp = require('sharp');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
 const utils = require('./utils');
-const { buildResponse, isValidCommand } = utils;
+const { buildResponse, isValidCommand, logger } = utils;
 const BUCKET = process.env.BUCKET;
 
 const MimeType = {
@@ -58,7 +58,7 @@ function resizeImage(key) {
       // Make sure command is valid...
 
       if (!isValidCommand(command)) {
-        console.log('Invalid command:', command);
+        logger.info('Invalid command:', command);
 
         return returnToHandler(buildResponse());
       }
@@ -68,7 +68,7 @@ function resizeImage(key) {
     // No match...
 
     else {
-      console.log('Invalid key:', key);
+      logger.info('Invalid key:', key);
 
       return returnToHandler(buildResponse());
     }
@@ -77,13 +77,13 @@ function resizeImage(key) {
     // Disallow dimensions outside of 1920x1080
 
     if (width > 1920) {
-      console.log('Dimensions too large:', width, height);
+      logger.info('Dimensions too large:', width, height);
 
       return returnToHandler(buildResponse());
     }
 
     if (height > 1080) {
-      console.log('Dimensions too large:', width, height);
+      logger.info('Dimensions too large:', width, height);
 
       return returnToHandler(buildResponse());
     }
@@ -146,7 +146,7 @@ function resizeImage(key) {
       // Wah wah...
 
       .catch((err) => {
-        console.log(err);
+        logger.info(err);
 
         return returnToHandler(buildResponse());
       });

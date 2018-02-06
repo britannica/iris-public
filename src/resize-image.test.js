@@ -10,7 +10,16 @@ Object.assign(process.env, { BUCKET, CLOUDFRONT_URL, ERROR_DOCUMENT });
 // Require stuff after setting environment variables
 
 const assert = require('chai').assert;
+const { logger } = require('./utils');
 const resizeImage = require('./resize-image');
+
+
+// Put logging on silent mode
+
+logger.transports['console.info'].silent = true;
+
+
+// Tests
 
 describe('resizeImage', () => {
   it('valid keys return permanent redirect to new object', (done) => {
