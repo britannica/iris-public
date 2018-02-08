@@ -20,3 +20,5 @@ dist
 
 # Remove this after figuring out how to obfuscate local AWS resources
 config/local.json
+
+npm-debug.log
