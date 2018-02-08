@@ -1,8 +1,7 @@
 
 const winston = require('winston');
 
-const CLOUDFRONT_URL = process.env.CLOUDFRONT_URL;
-const ERROR_DOCUMENT = process.env.ERROR_DOCUMENT;
+const { CLOUDFRONT_URL, ERROR_DOCUMENT } = process.env;
 const logger = new winston.Logger();
 
 logger.add(winston.transports.Console, {

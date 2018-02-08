@@ -4,7 +4,7 @@ const sharp = require('sharp');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
 const utils = require('./utils');
 const { buildResponse, isValidCommand, logger } = utils;
-const BUCKET = process.env.BUCKET;
+const { BUCKET } = process.env;
 
 const MimeType = {
   GIF: 'image/gif',
