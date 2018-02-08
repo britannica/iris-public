@@ -1,6 +1,19 @@
 
-// Put logging on silent mode
+// Manually set environment variables
 
-const { logger } = require('./utils');
+const { BUCKET, CLOUDFRONT_URL, ERROR_DOCUMENT } = require('../config/local.json').handler;
 
-logger.transports['console.info'].silent = true;
+Object.assign(process.env, {
+  BUCKET,
+  CLOUDFRONT_URL,
+  ERROR_DOCUMENT
+});
+
+
+// Switch the logger to silent mode while testing
+
+beforeAll(() => {
+  const { logger } = require('./utils');
+
+  logger.transports['console.info'].silent = true;
+});
