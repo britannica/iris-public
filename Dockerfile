@@ -1,9 +1,8 @@
 FROM lambci/lambda:build-nodejs6.10
 
-COPY . .
+WORKDIR /src
 
-RUN npm install
+COPY package.json /src
+COPY /src /src
 
-EXPOSE 3000
-
-CMD ["npm", "start"]
+RUN npm install --production
