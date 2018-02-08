@@ -1,14 +1,14 @@
-.PHONY: all image package dist clean
+.PHONY: all build start dist clean
 
-IMAGE_NAME=amazonlinux:iris
+IMAGE_NAME=iris:latest
 
 all: package
 
 build:
-	docker build --tag ${IMAGE_NAME} .
+	docker build -t ${IMAGE_NAME} .
 
 start:
-	docker run --rm -v ${PWD}:/app -p 3000:3000 ${IMAGE_NAME}
+	docker run --rm -it -v ${PWD}:/app -p 3000:3000 ${IMAGE_NAME}
 
 dist: package
 	cd src && zip -FS -q -r ../dist/iris.zip *

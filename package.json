@@ -5,7 +5,7 @@
   "main": "handler.js",
   "scripts": {
     "test": "jest --coverage",
-    "start": "sls offline start --stage local"
+    "start": "sls offline start --stage local --host 0.0.0.0"
   },
   "repository": {
     "type": "git",
@@ -24,9 +24,7 @@
     "winston": "^2.4.0"
   },
   "devDependencies": {
-    "jest": "^22.1.4",
-    "serverless": "^1.26.0",
-    "serverless-offline": "^3.16.0"
+    "jest": "^22.1.4"
   },
   "jest": {
     "coverageReporters": [
