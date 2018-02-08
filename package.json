@@ -5,8 +5,7 @@
   "main": "handler.js",
   "scripts": {
     "test": "jest --coverage",
-    "start": "npm run rebuild && sls offline start --stage local",
-    "rebuild": "rm -r src/node_modules && cd src && npm install"
+    "start": "sls offline start --stage local"
   },
   "repository": {
     "type": "git",
@@ -19,9 +18,14 @@
     "url": "https://github.com/britannica/iris/issues"
   },
   "homepage": "https://github.com/britannica/iris#readme",
-  "dependencies": {},
+  "dependencies": {
+    "aws-sdk": "^2.190.0",
+    "sharp": "^0.19.0",
+    "winston": "^2.4.0"
+  },
   "devDependencies": {
     "jest": "^22.1.4",
+    "serverless": "^1.26.0",
     "serverless-offline": "^3.16.0"
   },
   "jest": {

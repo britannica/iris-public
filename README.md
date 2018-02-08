@@ -34,10 +34,10 @@ CDN/Media Server infrastructure with the capability of resizing images on the fl
 
 ### Local development
 
-1. `npm install`
-1. `npm start`
+1. `make install`
+1. `make start`
 
-This boots up an instance of `serverless-offline` at `http://localhost:3000`. You can test the resize function by using 
+This boots up an instance of `serverless-offline` at `http://localhost:3000` in a Docker container. You can test the resize function by using 
 a url like `http://localhost:3000/resizeImage?key=200x200/40/154340-050-3C5A71CD.jpg`. In that url, `200x200` are the dimensions you
 are testing and `/40/154340-050-3C5A71CD.jpg` is the path to the original image you are testing.
 
@@ -132,3 +132,8 @@ You should now be able to use your shiny new `cdn.example.com` domain!
 - Amazon Cloudfront
 - Amazon S3
 - AWS Lambda 
+
+# Docker
+
+1. Install Docker
+1. `docker pull lambci/lambda`
