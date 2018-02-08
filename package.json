@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest --coverage",
     "start": "npm run rebuild && sls offline start --stage local",
-    "rebuild": "rm -r src/node_modules && cd src && npm install"
+    "rebuild": "rm -r src/node_modules || true && cd src && npm install"
   },
   "repository": {
     "type": "git",
