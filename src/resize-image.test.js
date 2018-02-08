@@ -1,15 +1,6 @@
 
-// Set environment variables before importing resizeImage
-// todo: figure out a better way to set these...
-
-const { BUCKET, CLOUDFRONT_URL, ERROR_DOCUMENT } = require('../config/local.json').handler;
-
-Object.assign(process.env, { BUCKET, CLOUDFRONT_URL, ERROR_DOCUMENT });
-
-const { logger } = require('./utils');
 const resizeImage = require('./resize-image');
-
-logger.transports['console.info'].silent = true;
+const { CLOUDFRONT_URL, ERROR_DOCUMENT } = process.env;
 
 // Tests
 

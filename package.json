@@ -26,6 +26,7 @@
     "serverless-offline": "^3.16.0"
   },
   "jest": {
+    "setupTestFrameworkScriptFile": "./src/setupTests.js",
     "coverageReporters": [
       "text"
     ],
