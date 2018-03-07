@@ -59,6 +59,9 @@ functions:
 
 resources:
   Resources:
+
+    # Certificate Manager
+
     CDNCert:
       Type: AWS::CertificateManager::Certificate
       Properties:
@@ -66,6 +69,9 @@ resources:
         DomainValidationOptions:
           - DomainName: ${self:provider.environment.CERT_DOMAIN}
             ValidationDomain: ${self:provider.environment.CERT_TLD}
+
+    # S3
+
     MediaServer:
       Type: AWS::S3::Bucket
       DeletionPolicy: Retain
@@ -82,6 +88,21 @@ resources:
                 ReplaceKeyPrefixWith: ${self:provider.stage}/resizeImage?key=
               RoutingRuleCondition:
                 HttpErrorCodeReturnedEquals: 404
+
+    MediaServerPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: { "Ref": "MediaServer" }
+        PolicyDocument:
+          Statement:
+            -
+              "Effect": "Allow"
+              "Principal": "*"
+              "Action": "s3:GetObject"
+              "Resource": { "Fn::Join": ["", ["arn:aws:s3:::", { "Ref": "MediaServer" }, "/*" ] ] }
+
+    # CloudFormation
+
     MediaCDN:
       Type: AWS::CloudFront::Distribution
       Properties:
