@@ -1,6 +1,6 @@
 
 const utils = require('./utils');
-const { buildResponse, isValidCommand } = utils;
+const { buildResponse, isValidCommand, isValidDimensions, isValidImageType, getImageQuality, getDimensions } = utils;
 
 describe('utils', () => {
   describe('#buildResponse', () => {
@@ -52,6 +52,70 @@ describe('utils', () => {
 
     test('`greyscale` should return `false`', () => {
       expect(isValidCommand('greyscale')).toBe(false);
+    });
+  });
+
+  describe('#isValidDimensions', () => {
+    test('`100x100` should return `false`', () => {
+      expect(isValidDimensions('100x100')).toBe(true);
+    });
+
+    test('`BxB` should return `false`', () => {
+      expect(isValidDimensions('BxB')).toBe(false);
+    });
+
+    test('`100x` should return `false`', () => {
+      expect(isValidDimensions('100x')).toBe(false);
+    });
+
+    test('`x100` should return `false`', () => {
+      expect(isValidDimensions('x100')).toBe(false);
+    });
+
+    test('`100` should return `false`', () => {
+      expect(isValidDimensions('100')).toBe(false);
+    });
+
+    test('`asdf` should return `false`', () => {
+      expect(isValidDimensions('asdf')).toBe(false);
+    });
+
+    test('`asdfxasdf` should return `false`', () => {
+      expect(isValidDimensions('asdfxasdf')).toBe(false);
+    });
+
+    test('`100x100x100` should return `false`', () => {
+      expect(isValidDimensions('100x100x100')).toBe(false);
+    });
+  });
+
+  describe('#isValidImageType', () => {
+    test('`map` should return `true`', () => {
+      expect(isValidImageType('map')).toBe(true);
+    });
+
+    test('`asdf` should return `false`', () => {
+      expect(isValidImageType('asdf')).toBe(false);
+    });
+  });
+
+  describe('#getImageQuality', () => {
+    test('`map` returns `75`', () => {
+      expect(getImageQuality('map')).toBe(75);
+    });
+
+    test('`anything-else` returns `60`', () => {
+      expect(getImageQuality('anything-else')).toBe(60);
+    });
+  });
+
+  describe('#getDimensions', () => {
+    test('`100x100` returns [100, 100]', () => {
+      expect(getDimensions('100x100')).toEqual(expect.arrayContaining([100, 100]));
+    });
+
+    test('`invalid dimensions` returns empty array', () => {
+      expect(getDimensions('invalid dimensions')).toEqual(expect.arrayContaining([]));
     });
   });
 });

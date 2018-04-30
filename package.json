@@ -19,7 +19,9 @@
     "url": "https://github.com/britannica/iris/issues"
   },
   "homepage": "https://github.com/britannica/iris#readme",
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.10"
+  },
   "devDependencies": {
     "jest": "^22.1.4",
     "serverless": "^1.26.0",

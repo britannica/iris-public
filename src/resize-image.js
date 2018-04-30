@@ -3,14 +3,12 @@ const AWS = require('aws-sdk');
 const sharp = require('sharp');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
 const utils = require('./utils');
-const { buildResponse, isValidCommand, logger } = utils;
+const { ImageQuality, Param, MimeType } = require('./constants');
+const { buildResponse, getImageQuality, getDimensions, logger } = utils;
 const { BUCKET } = process.env;
 
-const MimeType = {
-  GIF: 'image/gif',
-  JPEG: 'image/jpeg',
-  PNG: 'image/png',
-};
+// todo: the crop operation for sharp is "extract"
+// http://sharp.pixelplumbing.com/en/stable/api-operation/#extract
 
 
 /**
@@ -28,68 +26,45 @@ const MimeType = {
 
 function resizeImage(key) {
   return new Promise((returnToHandler) => {
-    const rectangle = key.match(/(\d+)x(\d+)\/(.*)/);
-    const rectangleWithCommand = key.match(/(\d+)x(\d+):(.*?)\/(.*)/);
+    // Take a string of params and turn them into an array of param objects
 
-    let height;
-    let width;
-    let imagePath;
-    let command = 'max';
+    const chunks = key.split(/\/(.*)/);
+    const imagePath = chunks[1];
+    const params = chunks[0]
+      .split(',')
+      .filter(param => param.indexOf(':') !== -1)
+      .map((param) => {
+        const paramChunks = param.split(':');
 
-
-    // 100x100/path/to/image
-
-    if (Array.isArray(rectangle)) {
-      width = parseInt(rectangle[1]);
-      height = parseInt(rectangle[2]);
-      imagePath = rectangle[3];
-    }
-
-
-    // 100x100@max/path/to/image
-
-    else if (Array.isArray(rectangleWithCommand)) {
-      width = parseInt(rectangleWithCommand[1]);
-      height = parseInt(rectangleWithCommand[2]);
-      command = rectangleWithCommand[3];
-      imagePath = rectangleWithCommand[4];
+        return {
+          type: paramChunks[0],
+          value: paramChunks[1],
+        };
+      });
 
 
-      // Make sure command is valid...
+    // Set the params
 
-      if (!isValidCommand(command)) {
-        logger.info('Invalid command:', command);
+    let height = null;
+    let width = null;
+    let quality = ImageQuality.DEFAULT;
 
-        return returnToHandler(buildResponse());
+    params.forEach((param) => {
+      switch (param.type) {
+        case Param.SIZE:
+          [width, height] = getDimensions(param.value);
+
+          break;
+
+        case Param.TYPE:
+          quality = getImageQuality(param.value);
+
+          break;
       }
-    }
+    });
 
 
-    // No match...
-
-    else {
-      logger.info('Invalid key:', key);
-
-      return returnToHandler(buildResponse());
-    }
-
-
-    // Disallow dimensions outside of 1920x1080
-
-    if (width > 1920) {
-      logger.info('Dimensions too large:', width, height);
-
-      return returnToHandler(buildResponse());
-    }
-
-    if (height > 1080) {
-      logger.info('Dimensions too large:', width, height);
-
-      return returnToHandler(buildResponse());
-    }
-
-
-    // Key matched, continue resize procedure
+    // Continue resize procedure
 
     S3.getObject({ Bucket: BUCKET, Key: imagePath })
       .promise()
@@ -99,19 +74,16 @@ function resizeImage(key) {
 
         switch (mimeType) {
           case MimeType.JPEG:
-            image
-              .withoutEnlargement()
-              .resize(width, height);
+            image.withoutEnlargement();
 
-            switch (command) {
-              case 'max':
-              default:
-                image[command]();
+            if (height && width) {
+              image.resize(width, height);
             }
 
             return image
+              .max()
               .toFormat('jpg')
-              .jpeg({ quality: 60 })
+              .jpeg({ quality })
               .toBuffer()
               .then(buffer => resolve({ buffer, mimeType }));
 

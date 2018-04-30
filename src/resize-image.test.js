@@ -5,8 +5,28 @@ const { CLOUDFRONT_URL, ERROR_DOCUMENT } = process.env;
 // Tests
 
 describe('resizeImage', () => {
-  test('valid keys return permanent redirect to new object', (done) => {
-    const validKey = '500x500/56/176256-131-5CEFC130.jpg';
+  test('valid "size" keys return permanent redirect to new object', (done) => {
+    const validKey = 's:500x500/56/176256-131-5CEFC130.jpg';
+
+    resizeImage(validKey)
+      .then((response) => {
+        testValidKey(response, validKey);
+        done();
+      });
+  });
+
+  test('valid "image type" keys return permanent redirect to new object', (done) => {
+    const validKey = 't:map/56/176256-131-5CEFC130.jpg';
+
+    resizeImage(validKey)
+      .then((response) => {
+        testValidKey(response, validKey);
+        done();
+      });
+  });
+
+  test('valid combination of keys return permanent redirect to new object', (done) => {
+    const validKey = 's:500x500,t:map/56/176256-131-5CEFC130.jpg';
 
     resizeImage(validKey)
       .then((response) => {
@@ -24,52 +44,15 @@ describe('resizeImage', () => {
   });
 
   test('not found in S3 should return 404.html', (done) => {
-    resizeImage('100x100/this-image-definitely-does-not-exist')
+    resizeImage('s:100x100/this-image-definitely-does-not-exist')
       .then((response) => {
         testDefaultResponse(response);
         done();
       });
   });
-
-  test('invalid commands should return 404.html', (done) => {
-    resizeImage('500x500:fake/56/176256-131-5CEFC130.jpg')
-      .then((response) => {
-        testDefaultResponse(response);
-        done();
-      });
-  });
-
-  test('valid commands should return permanent redirect to new object', (done) => {
-      const validKeyWithCommand = '500x500:max/56/176256-131-5CEFC130.jpg';
-
-      resizeImage(validKeyWithCommand)
-        .then((response) => {
-          testValidKey(response, validKeyWithCommand);
-          done();
-        });
-    }
-  );
-
-  test('invalid dimensions should return 404.html when `height` exceeds maximum', (done) => {
-      resizeImage('500x5000/56/176256-131-5CEFC130.jpg')
-        .then((response) => {
-          testDefaultResponse(response);
-          done();
-        });
-    }
-  );
-
-  test('invalid dimensions should return 404.html when `width` exceeds maximum', (done) => {
-      resizeImage('5000x500/56/176256-131-5CEFC130.jpg')
-        .then((response) => {
-          testDefaultResponse(response);
-          done();
-        });
-    }
-  );
 
   test('invalid file types should return original key for GIF', (done) => {
-    const size = '500x500';
+    const size = 's:500x500';
     const originalKey = '13/181513-131-4F074388.gif';
 
     resizeImage(`${size}/${originalKey}`)
