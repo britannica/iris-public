@@ -57,9 +57,18 @@ describe('resizeImage', () => {
 
     resizeImage(`${size}/${originalKey}`)
       .then((response) => {
-        expect(response.statusCode).toBe(302);
-        expect(response.headers['Cache-Control']).toBe('max-age=604800');
-        expect(response.headers['Location']).toBe(`${CLOUDFRONT_URL}/${originalKey}`);
+        testOriginalKey(response, originalKey);
+        done();
+      });
+  });
+
+  test('if all parameters are invalid, return original key', (done) => {
+    const params = 'a:123,b:456';
+    const originalKey = '56/176256-131-5CEFC130.jpg';
+
+    resizeImage(`${params}/${originalKey}`)
+      .then((response) => {
+        testOriginalKey(response, originalKey);
         done();
       });
   });
@@ -90,4 +99,18 @@ function testValidKey(response, key) {
   expect(response.statusCode).toBe(301);
   expect(response.headers['Cache-Control']).toBe(null);
   expect(response.headers['Location']).toBe(`${CLOUDFRONT_URL}/${key}`);
+}
+
+
+/**
+ * Run tests against a response that is returning the original image
+ *
+ * @param {object} response
+ * @param {string} originalKey
+ */
+
+function testOriginalKey(response, originalKey) {
+  expect(response.statusCode).toBe(302);
+  expect(response.headers['Cache-Control']).toBe('max-age=604800');
+  expect(response.headers['Location']).toBe(`${CLOUDFRONT_URL}/${originalKey}`);
 }

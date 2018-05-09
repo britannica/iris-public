@@ -39,6 +39,7 @@ function resizeImage(key) {
         return {
           type: paramChunks[0],
           value: paramChunks[1],
+          isValid: false,
         };
       });
 
@@ -49,19 +50,36 @@ function resizeImage(key) {
     let width = null;
     let quality = ImageQuality.DEFAULT;
 
-    params.forEach((param) => {
+    params.map((param) => {
       switch (param.type) {
         case Param.SIZE:
           [width, height] = getDimensions(param.value);
 
-          break;
+          return Object.assign(param, {
+            isValid: true,
+          });
 
         case Param.TYPE:
           quality = getImageQuality(param.value);
 
-          break;
+          return Object.assign(param, {
+            isValid: true,
+          });
+
+        default:
+
+          return Object.assign(param, {
+            isValid: false,
+          });
       }
     });
+
+
+    // Redirect to the original image if there are no valid parameters
+
+    if (params.filter(param => param.isValid === true).length === 0) {
+      return returnToHandler(buildResponse(imagePath));
+    }
 
 
     // Continue resize procedure
