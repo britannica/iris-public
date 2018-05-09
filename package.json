@@ -23,9 +23,9 @@
     "lodash": "^4.17.10"
   },
   "devDependencies": {
-    "jest": "^22.1.4",
-    "serverless": "^1.26.0",
-    "serverless-offline": "^3.16.0"
+    "jest": "^22.4.3",
+    "serverless": "^1.27.2",
+    "serverless-offline": "^3.20.3"
   },
   "jest": {
     "setupTestFrameworkScriptFile": "./src/setupTests.js",
