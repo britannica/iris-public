@@ -1,6 +1,6 @@
 
 const utils = require('./utils');
-const { buildResponse, isValidCommand, isValidDimensions, isValidImageType, getImageQuality, getDimensions } = utils;
+const { buildResponse, isValidDimensions, getImageQuality, getDimensions } = utils;
 
 describe('utils', () => {
   describe('#buildResponse', () => {
@@ -41,20 +41,6 @@ describe('utils', () => {
     );
   });
 
-  describe('#isValidCommand', () => {
-    test('`max` should return `true`', () => {
-      expect(isValidCommand('max')).toBe(true);
-    });
-
-    test('`crop` should return `false`', () => {
-      expect(isValidCommand('crop')).toBe(false);
-    });
-
-    test('`greyscale` should return `false`', () => {
-      expect(isValidCommand('greyscale')).toBe(false);
-    });
-  });
-
   describe('#isValidDimensions', () => {
     test('`100x100` should return `false`', () => {
       expect(isValidDimensions('100x100')).toBe(true);
@@ -86,16 +72,6 @@ describe('utils', () => {
 
     test('`100x100x100` should return `false`', () => {
       expect(isValidDimensions('100x100x100')).toBe(false);
-    });
-  });
-
-  describe('#isValidImageType', () => {
-    test('`map` should return `true`', () => {
-      expect(isValidImageType('map')).toBe(true);
-    });
-
-    test('`asdf` should return `false`', () => {
-      expect(isValidImageType('asdf')).toBe(false);
     });
   });
 

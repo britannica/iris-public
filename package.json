@@ -25,7 +25,8 @@
   "devDependencies": {
     "jest": "^22.4.3",
     "serverless": "^1.27.2",
-    "serverless-offline": "^3.20.3"
+    "serverless-offline": "^3.20.3",
+    "serverless-secrets-plugin": "^0.1.0"
   },
   "jest": {
     "setupTestFrameworkScriptFile": "./src/setupTests.js",

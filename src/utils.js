@@ -41,19 +41,6 @@ const utils = {
 
 
   /**
-   * Determine if the given command is on the list of allowed sharp commands
-   * todo: use Object.values after upgrading to node 8
-   *
-   * @param {String} command
-   * @returns {boolean}
-   */
-
-  isValidCommand(command) {
-    return _.values(Command).indexOf(command) !== -1;
-  },
-
-
-  /**
    * Validate that the dimension string conforms to the structure: 100x100
    *
    * @param {string} dimensions
@@ -84,18 +71,6 @@ const utils = {
 
 
   /**
-   * Determine if the given image type is valid
-   *
-   * @param {string} imageType
-   * @returns {boolean}
-   */
-
-  isValidImageType(imageType) {
-    return _.values(ImageType).indexOf(imageType) !== -1;
-  },
-
-
-  /**
    * Retrieve height and width from a string
    *
    * @param {string} dimensions
@@ -114,13 +89,14 @@ const utils = {
 
 
   /**
+   * Retrieve image quality based on a valid image type
    *
    * @param {string} imageType
    * @returns {number}
    */
 
   getImageQuality(imageType) {
-    if (!utils.isValidImageType(imageType)) {
+    if (_.values(ImageType).indexOf(imageType) === -1) {
       logger.info('Invalid image type:', imageType);
       logger.info('Defaulting to image quality:', ImageQuality.DEFAULT);
 
@@ -128,6 +104,25 @@ const utils = {
     }
 
     return ImageQuality[imageType];
+  },
+
+
+  /**
+   * Retrieve a valid command
+   *
+   * @param {string} command
+   * @returns {string}
+   */
+
+  getCommand(command) {
+    if (_.values(Command).indexOf(command) === -1) {
+      logger.info('Invalid command:', command);
+      logger.info('Defaulting to command:', Command.DEFAULT);
+
+      return Command.DEFAULT;
+    }
+
+    return command;
   },
 };
 

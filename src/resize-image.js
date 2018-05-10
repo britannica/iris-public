@@ -3,8 +3,9 @@ const AWS = require('aws-sdk');
 const sharp = require('sharp');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
 const utils = require('./utils');
-const { ImageQuality, Param, MimeType } = require('./constants');
-const { buildResponse, getImageQuality, getDimensions, logger } = utils;
+const { requestCropHints, getExtractOptions } = require('./crop-utils');
+const { Command, ImageQuality, Param, MimeType } = require('./constants');
+const { buildResponse, getImageQuality, getDimensions, getCommand, logger } = utils;
 const { BUCKET } = process.env;
 
 // todo: the crop operation for sharp is "extract"
@@ -46,12 +47,20 @@ function resizeImage(key) {
 
     // Set the params
 
+    let command = Command.DEFAULT;
+    let quality = ImageQuality.DEFAULT;
     let height = null;
     let width = null;
-    let quality = ImageQuality.DEFAULT;
 
     params.map((param) => {
       switch (param.type) {
+        case Param.COMMAND:
+          command = getCommand(param.value);
+
+          return Object.assign(param, {
+            isValid: true,
+          });
+
         case Param.SIZE:
           [width, height] = getDimensions(param.value);
 
@@ -65,12 +74,6 @@ function resizeImage(key) {
           return Object.assign(param, {
             isValid: true,
           });
-
-        default:
-
-          return Object.assign(param, {
-            isValid: false,
-          });
       }
     });
 
@@ -82,11 +85,11 @@ function resizeImage(key) {
     }
 
 
-    // Continue resize procedure
+    // Continue image manipulation procedure
 
     S3.getObject({ Bucket: BUCKET, Key: imagePath })
       .promise()
-      .then(data => new Promise((resolve) => {
+      .then(async data => {
         const image = sharp(data.Body);
         const mimeType = data.ContentType;
 
@@ -94,16 +97,29 @@ function resizeImage(key) {
           case MimeType.JPEG:
             image.withoutEnlargement();
 
+            switch (command) {
+              case Command.CROP:
+                const annotateImageResponse = await requestCropHints(data.Body, width, height);
+                const extractOptions = getExtractOptions(annotateImageResponse);
+
+                image.extract(extractOptions);
+
+                break;
+
+              case Command.DEFAULT:
+              default:
+                image.max();
+            }
+
             if (height && width) {
               image.resize(width, height);
             }
 
             return image
-              .max()
               .toFormat('jpg')
               .jpeg({ quality })
               .toBuffer()
-              .then(buffer => resolve({ buffer, mimeType }));
+              .then(buffer => Promise.resolve({ buffer, mimeType }));
 
           case MimeType.GIF:
           default:
@@ -113,7 +129,7 @@ function resizeImage(key) {
 
             return returnToHandler(buildResponse(imagePath));
         }
-      }))
+      })
 
 
       // Write the new, resized image back to S3
@@ -130,7 +146,12 @@ function resizeImage(key) {
 
       // Return a permanent redirect to the new image
 
-      .then(() => returnToHandler(buildResponse(key, 301)))
+      .then(() => {
+        logger.info('Image manipulation successful.');
+        logger.info(params);
+
+        return returnToHandler(buildResponse(key, 301));
+      })
 
 
       // Wah wah...
