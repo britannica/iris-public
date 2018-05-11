@@ -26,7 +26,7 @@ const { BUCKET } = process.env;
  */
 
 function resizeImage(key) {
-  return new Promise((returnToHandler) => {
+  return new Promise(async (returnToHandler) => {
     // Take a string of params and turn them into an array of param objects
 
     const chunks = key.split(/\/(.*)/);
@@ -87,80 +87,79 @@ function resizeImage(key) {
 
     // Continue image manipulation procedure
 
-    S3.getObject({ Bucket: BUCKET, Key: imagePath })
-      .promise()
-      .then(async data => {
-        const image = sharp(data.Body);
-        const mimeType = data.ContentType;
+    try {
+      const data = await S3.getObject({ Bucket: BUCKET, Key: imagePath }).promise();
+      const image = sharp(data.Body);
+      const mimeType = data.ContentType;
+      let buffer = null;
 
-        switch (mimeType) {
-          case MimeType.JPEG:
-            image.withoutEnlargement();
+      switch (mimeType) {
+        case MimeType.JPEG:
+          image.withoutEnlargement();
 
-            switch (command) {
-              case Command.CROP:
-                const annotateImageResponse = await requestCropHints(data.Body, width, height);
-                const extractOptions = getExtractOptions(annotateImageResponse);
+          switch (command) {
+            case Command.CROP:
+              const annotateImageResponse = await requestCropHints(data.Body, width, height);
+              const extractOptions = getExtractOptions(annotateImageResponse);
 
-                image.extract(extractOptions);
+              image.extract(extractOptions);
 
-                break;
+              break;
 
-              case Command.DEFAULT:
-              default:
-                image.max();
-            }
+            case Command.DEFAULT:
+            default:
+              image.max();
+          }
 
-            if (height && width) {
-              image.resize(width, height);
-            }
+          if (height && width) {
+            image.resize(width, height);
+          }
 
-            return image
-              .toFormat('jpg')
-              .jpeg({ quality })
-              .toBuffer()
-              .then(buffer => Promise.resolve({ buffer, mimeType }));
+          buffer = await image
+            .toFormat('jpg')
+            .jpeg({ quality })
+            .toBuffer();
 
-          case MimeType.GIF:
-          default:
-            // Pass control back to the Lambda handler
-            // Redirect GIFs back to their original version without resizing
-            // todo: add animation detection https://www.npmjs.com/package/animated-gif-detector
+          break;
 
-            return returnToHandler(buildResponse(imagePath));
-        }
-      })
+        case MimeType.GIF:
+        default:
+          // Pass control back to the Lambda handler
+          // Redirect GIFs back to their original version without resizing
+          // todo: add animation detection https://www.npmjs.com/package/animated-gif-detector
+
+          return returnToHandler(buildResponse(imagePath));
+      }
 
 
       // Write the new, resized image back to S3
 
-      .then(({ buffer, mimeType }) => S3.putObject({
+      await S3.putObject({
         ACL: 'public-read',
         Body: buffer,
         Bucket: BUCKET,
         CacheControl: 'public, max-age=31536000',
         ContentType: mimeType,
         Key: key,
-      }).promise())
+      }).promise();
 
 
       // Return a permanent redirect to the new image
 
-      .then(() => {
-        logger.info('Image manipulation successful.');
-        logger.info(params);
+      logger.info('Successfully manipulated image:', imagePath);
+      logger.info(params);
 
-        return returnToHandler(buildResponse(key, 301));
-      })
+      return returnToHandler(buildResponse(key, 301));
+    }
 
 
-      // Wah wah...
+    // Wah wah...
 
-      .catch((err) => {
-        logger.info(err);
+    catch (err) {
+      logger.info(err);
 
-        return returnToHandler(buildResponse());
-      });
+      return returnToHandler(buildResponse());
+    }
   });
 }
 

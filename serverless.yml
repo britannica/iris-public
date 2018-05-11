@@ -35,7 +35,6 @@ provider:
     # API Keys
 
     GOOGLE_API_KEY: ${self:custom.secrets.GOOGLE_API_KEY}
-    GOOGLE_APPLICATION_CREDENTIALS: ${self:custom.secrets.GOOGLE_APPLICATION_CREDENTIALS}
 
     # Resources
 

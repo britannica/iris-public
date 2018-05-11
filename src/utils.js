@@ -1,6 +1,5 @@
 
 const winston = require('winston');
-const _ = require('lodash');
 const { Command, ImageQuality, ImageType } = require('./constants');
 
 const { CLOUDFRONT_URL, ERROR_DOCUMENT } = process.env;
@@ -96,7 +95,7 @@ const utils = {
    */
 
   getImageQuality(imageType) {
-    if (_.values(ImageType).indexOf(imageType) === -1) {
+    if (Object.values(ImageType).indexOf(imageType) === -1) {
       logger.info('Invalid image type:', imageType);
       logger.info('Defaulting to image quality:', ImageQuality.DEFAULT);
 
@@ -115,7 +114,7 @@ const utils = {
    */
 
   getCommand(command) {
-    if (_.values(Command).indexOf(command) === -1) {
+    if (Object.values(Command).indexOf(command) === -1) {
       logger.info('Invalid command:', command);
       logger.info('Defaulting to command:', Command.DEFAULT);
 
