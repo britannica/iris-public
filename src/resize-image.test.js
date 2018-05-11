@@ -72,6 +72,29 @@ describe('resizeImage', () => {
         done();
       });
   });
+
+
+  // --- Crop
+
+  test('a crop command without a size returns a permanent redirect to a new object', (done) => {
+    const key = 'c:crop/56/176256-131-5CEFC130.jpg';
+
+    resizeImage(key)
+      .then((response) => {
+        testValidKey(response, key);
+        done();
+      });
+  });
+
+  test('a crop command with a size returns a permanent redirect to a new object', (done) => {
+    const key = 's:500x500,c:crop/56/176256-131-5CEFC130.jpg';
+
+    resizeImage(key)
+      .then((response) => {
+        testValidKey(response, key);
+        done();
+      });
+  });
 });
 
 

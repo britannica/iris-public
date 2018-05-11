@@ -1,8 +1,10 @@
 
-const utils = require('./utils');
-const { buildResponse, isValidDimensions, getImageQuality, getDimensions } = utils;
+const { Command } = require('./constants');
+const { buildResponse, isValidDimensions, getImageQuality, getDimensions, getCommand } = require('./utils');
 
 describe('utils', () => {
+  // --- buildResponse
+
   describe('#buildResponse', () => {
     let response = {};
 
@@ -41,6 +43,9 @@ describe('utils', () => {
     );
   });
 
+
+  // --- isValidDimensions
+
   describe('#isValidDimensions', () => {
     test('`100x100` should return `false`', () => {
       expect(isValidDimensions('100x100')).toBe(true);
@@ -75,6 +80,9 @@ describe('utils', () => {
     });
   });
 
+
+  // --- getImageQuality
+
   describe('#getImageQuality', () => {
     test('`map` returns `75`', () => {
       expect(getImageQuality('map')).toBe(75);
@@ -85,6 +93,9 @@ describe('utils', () => {
     });
   });
 
+
+  // --- getDimensions
+
   describe('#getDimensions', () => {
     test('`100x100` returns [100, 100]', () => {
       expect(getDimensions('100x100')).toEqual(expect.arrayContaining([100, 100]));
@@ -92,6 +103,19 @@ describe('utils', () => {
 
     test('`invalid dimensions` returns empty array', () => {
       expect(getDimensions('invalid dimensions')).toEqual(expect.arrayContaining([]));
+    });
+  });
+
+
+  // --- getCommand
+
+  describe('#getCommand', () => {
+    test('passing a valid command returns that command', () => {
+      expect(getCommand('crop')).toEqual('crop');
+    });
+
+    test('passing an invalid command returns the default command', () => {
+      expect(getCommand('definitely not a real command')).toEqual(Command.DEFAULT);
     });
   });
 });

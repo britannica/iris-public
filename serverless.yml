@@ -23,7 +23,6 @@ custom:
     location: src
   secretsFilePathPrefix: config
   config: ${file(config/${self:provider.stage}.json)}
-  secrets: ${file(config/secrets.${self:provider.stage}.yml)}
 
 provider:
   name: aws
@@ -34,7 +33,7 @@ provider:
 
     # API Keys
 
-    GOOGLE_API_KEY: ${self:custom.secrets.GOOGLE_API_KEY}
+    GOOGLE_API_KEY: ${ssm:/iris/GOOGLE_API_KEY}
 
     # Resources
 

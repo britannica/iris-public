@@ -99,6 +99,15 @@ function resizeImage(key) {
 
           switch (command) {
             case Command.CROP:
+              // No need to request crop vertices if no dimensions were specified
+
+              if (height === null && width === null) {
+                break;
+              }
+
+
+              // Get crop vertices from Google and transform the response into values that Sharp can use
+
               const annotateImageResponse = await requestCropHints(data.Body, width, height);
               const extractOptions = getExtractOptions(annotateImageResponse);
 

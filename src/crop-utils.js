@@ -16,7 +16,7 @@ module.exports = {
    * @param {Buffer} buffer
    * @param {number} width
    * @param {number} height
-   * @returns {Promise<*>}
+   * @returns {Promise}
    */
 
   async requestCropHints(buffer, width, height) {
