@@ -20,27 +20,32 @@ custom:
   serverless-offline:
     stage: local
     location: src
+  config: ${file(config/${self:provider.stage}.json)}
 
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
-  runtime: nodejs6.10
+  runtime: nodejs8.10
   memorySize: 1536
   environment:
 
+    # API Keys
+
+    GOOGLE_API_KEY: ${ssm:/iris/GOOGLE_API_KEY}
+
     # Resources
 
-    API_GATEWAY:    ${file(config/${self:provider.stage}.json):resources.API_GATEWAY}
-    BUCKET_DOMAIN:  ${file(config/${self:provider.stage}.json):resources.BUCKET_DOMAIN}
-    CERT_ARN:       ${file(config/${self:provider.stage}.json):resources.CERT_ARN}
-    CERT_DOMAIN:    ${file(config/${self:provider.stage}.json):resources.CERT_DOMAIN}
-    CERT_TLD:       ${file(config/${self:provider.stage}.json):resources.CERT_TLD}
+    API_GATEWAY:    ${self:custom.config.resources.API_GATEWAY}
+    BUCKET_DOMAIN:  ${self:custom.config.resources.BUCKET_DOMAIN}
+    CERT_ARN:       ${self:custom.config.resources.CERT_ARN}
+    CERT_DOMAIN:    ${self:custom.config.resources.CERT_DOMAIN}
+    CERT_TLD:       ${self:custom.config.resources.CERT_TLD}
 
     # Handler
 
-    BUCKET:         ${file(config/${self:provider.stage}.json):handler.BUCKET}
-    CLOUDFRONT_URL: ${file(config/${self:provider.stage}.json):handler.CLOUDFRONT_URL}
-    ERROR_DOCUMENT: ${file(config/${self:provider.stage}.json):handler.ERROR_DOCUMENT}
+    BUCKET:         ${self:custom.config.handler.BUCKET}
+    CLOUDFRONT_URL: ${self:custom.config.handler.CLOUDFRONT_URL}
+    ERROR_DOCUMENT: ${self:custom.config.handler.ERROR_DOCUMENT}
 
   iamRoleStatements:
     - Effect: "Allow"

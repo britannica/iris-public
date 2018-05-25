@@ -1,5 +1,6 @@
 
 const Command = {
+  CROP: 'crop',
   DEFAULT: 'max',
 };
 

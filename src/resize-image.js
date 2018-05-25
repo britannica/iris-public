@@ -2,9 +2,10 @@
 const AWS = require('aws-sdk');
 const sharp = require('sharp');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
-const utils = require('./utils');
-const { ImageQuality, Param, MimeType } = require('./constants');
-const { buildResponse, getImageQuality, getDimensions, logger } = utils;
+const { Command, ImageQuality, Param, MimeType } = require('./constants');
+const { buildResponse, getImageQuality, getDimensions, getCommand, logger } = require('./utils');
+const { requestCropHints, getExtractOptions } = require('./crop-utils');
+const { performCommand } = require('./command-utils');
 const { BUCKET } = process.env;
 
 // todo: the crop operation for sharp is "extract"
@@ -25,7 +26,7 @@ const { BUCKET } = process.env;
  */
 
 function resizeImage(key) {
-  return new Promise((returnToHandler) => {
+  return new Promise(async (returnToHandler) => {
     // Take a string of params and turn them into an array of param objects
 
     const chunks = key.split(/\/(.*)/);
@@ -46,12 +47,20 @@ function resizeImage(key) {
 
     // Set the params
 
+    let command = Command.DEFAULT;
+    let quality = ImageQuality.DEFAULT;
     let height = null;
     let width = null;
-    let quality = ImageQuality.DEFAULT;
 
     params.map((param) => {
       switch (param.type) {
+        case Param.COMMAND:
+          command = getCommand(param.value);
+
+          return Object.assign(param, {
+            isValid: true,
+          });
+
         case Param.SIZE:
           [width, height] = getDimensions(param.value);
 
@@ -65,14 +74,17 @@ function resizeImage(key) {
           return Object.assign(param, {
             isValid: true,
           });
-
-        default:
-
-          return Object.assign(param, {
-            isValid: false,
-          });
       }
     });
+
+    // todo: document what's in this
+
+    const imageConfig = {
+      command,
+      quality,
+      height,
+      width,
+    };
 
 
     // Redirect to the original image if there are no valid parameters
@@ -82,64 +94,57 @@ function resizeImage(key) {
     }
 
 
-    // Continue resize procedure
+    // Continue image manipulation procedure
 
-    S3.getObject({ Bucket: BUCKET, Key: imagePath })
-      .promise()
-      .then(data => new Promise((resolve) => {
-        const image = sharp(data.Body);
-        const mimeType = data.ContentType;
+    try {
+      const data = await S3.getObject({ Bucket: BUCKET, Key: imagePath }).promise();
+      const mimeType = data.ContentType;
+      let imageBuffer = null;
 
-        switch (mimeType) {
-          case MimeType.JPEG:
-            image.withoutEnlargement();
+      switch (mimeType) {
+        case MimeType.JPEG:
+          imageBuffer = await performCommand(data.Body, imageConfig);
 
-            if (height && width) {
-              image.resize(width, height);
-            }
+          break;
 
-            return image
-              .max()
-              .toFormat('jpg')
-              .jpeg({ quality })
-              .toBuffer()
-              .then(buffer => resolve({ buffer, mimeType }));
+        case MimeType.GIF:
+        default:
+          // Pass control back to the Lambda handler
+          // Redirect GIFs back to their original version without resizing
+          // todo: add animation detection https://www.npmjs.com/package/animated-gif-detector
 
-          case MimeType.GIF:
-          default:
-            // Pass control back to the Lambda handler
-            // Redirect GIFs back to their original version without resizing
-            // todo: add animation detection https://www.npmjs.com/package/animated-gif-detector
-
-            return returnToHandler(buildResponse(imagePath));
-        }
-      }))
+          return returnToHandler(buildResponse(imagePath));
+      }
 
 
       // Write the new, resized image back to S3
 
-      .then(({ buffer, mimeType }) => S3.putObject({
+      await S3.putObject({
         ACL: 'public-read',
-        Body: buffer,
+        Body: imageBuffer,
         Bucket: BUCKET,
         CacheControl: 'public, max-age=31536000',
         ContentType: mimeType,
         Key: key,
-      }).promise())
+      }).promise();
 
 
       // Return a permanent redirect to the new image
 
-      .then(() => returnToHandler(buildResponse(key, 301)))
+      logger.info('Successfully manipulated image:', imagePath);
+      logger.info(params);
+
+      return returnToHandler(buildResponse(key, 301));
+    }
 
 
-      // Wah wah...
+    // Wah wah...
 
-      .catch((err) => {
-        logger.info(err);
+    catch (err) {
+      logger.info(err);
 
-        return returnToHandler(buildResponse());
-      });
+      return returnToHandler(buildResponse());
+    }
   });
 }
 

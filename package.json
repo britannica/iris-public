@@ -19,10 +19,10 @@
     "url": "https://github.com/britannica/iris/issues"
   },
   "homepage": "https://github.com/britannica/iris#readme",
-  "dependencies": {
-    "lodash": "^4.17.10"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@google-cloud/vision": "^0.19.0",
+    "deasync": "^0.1.13",
     "jest": "^22.4.3",
     "serverless": "^1.27.2",
     "serverless-offline": "^3.20.3"

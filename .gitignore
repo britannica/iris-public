@@ -22,3 +22,8 @@ dist
 config/local.json
 
 npm-debug.log
+
+# Secrets!
+config/secrets.local.yml
+config/secrets.dev.yml
+config/secrets.production.yml

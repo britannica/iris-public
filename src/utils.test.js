@@ -1,8 +1,10 @@
 
-const utils = require('./utils');
-const { buildResponse, isValidCommand, isValidDimensions, isValidImageType, getImageQuality, getDimensions } = utils;
+const { Command } = require('./constants');
+const { buildResponse, isValidDimensions, getImageQuality, getDimensions, getCommand } = require('./utils');
 
 describe('utils', () => {
+  // --- buildResponse
+
   describe('#buildResponse', () => {
     let response = {};
 
@@ -41,19 +43,8 @@ describe('utils', () => {
     );
   });
 
-  describe('#isValidCommand', () => {
-    test('`max` should return `true`', () => {
-      expect(isValidCommand('max')).toBe(true);
-    });
 
-    test('`crop` should return `false`', () => {
-      expect(isValidCommand('crop')).toBe(false);
-    });
-
-    test('`greyscale` should return `false`', () => {
-      expect(isValidCommand('greyscale')).toBe(false);
-    });
-  });
+  // --- isValidDimensions
 
   describe('#isValidDimensions', () => {
     test('`100x100` should return `false`', () => {
@@ -89,15 +80,8 @@ describe('utils', () => {
     });
   });
 
-  describe('#isValidImageType', () => {
-    test('`map` should return `true`', () => {
-      expect(isValidImageType('map')).toBe(true);
-    });
 
-    test('`asdf` should return `false`', () => {
-      expect(isValidImageType('asdf')).toBe(false);
-    });
-  });
+  // --- getImageQuality
 
   describe('#getImageQuality', () => {
     test('`map` returns `75`', () => {
@@ -109,6 +93,9 @@ describe('utils', () => {
     });
   });
 
+
+  // --- getDimensions
+
   describe('#getDimensions', () => {
     test('`100x100` returns [100, 100]', () => {
       expect(getDimensions('100x100')).toEqual(expect.arrayContaining([100, 100]));
@@ -116,6 +103,19 @@ describe('utils', () => {
 
     test('`invalid dimensions` returns empty array', () => {
       expect(getDimensions('invalid dimensions')).toEqual(expect.arrayContaining([]));
+    });
+  });
+
+
+  // --- getCommand
+
+  describe('#getCommand', () => {
+    test('passing a valid command returns that command', () => {
+      expect(getCommand('crop')).toEqual('crop');
+    });
+
+    test('passing an invalid command returns the default command', () => {
+      expect(getCommand('definitely not a real command')).toEqual(Command.DEFAULT);
     });
   });
 });
