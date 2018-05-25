@@ -2,10 +2,10 @@
 const AWS = require('aws-sdk');
 const sharp = require('sharp');
 const S3 = new AWS.S3({ signatureVersion: 'v4' });
-const utils = require('./utils');
-const { requestCropHints, getExtractOptions } = require('./crop-utils');
 const { Command, ImageQuality, Param, MimeType } = require('./constants');
-const { buildResponse, getImageQuality, getDimensions, getCommand, logger } = utils;
+const { buildResponse, getImageQuality, getDimensions, getCommand, logger } = require('./utils');
+const { requestCropHints, getExtractOptions } = require('./crop-utils');
+const { performCommand } = require('./command-utils');
 const { BUCKET } = process.env;
 
 // todo: the crop operation for sharp is "extract"
@@ -77,6 +77,15 @@ function resizeImage(key) {
       }
     });
 
+    // todo: document what's in this
+
+    const imageConfig = {
+      command,
+      quality,
+      height,
+      width,
+    };
+
 
     // Redirect to the original image if there are no valid parameters
 
@@ -89,45 +98,12 @@ function resizeImage(key) {
 
     try {
       const data = await S3.getObject({ Bucket: BUCKET, Key: imagePath }).promise();
-      const image = sharp(data.Body);
       const mimeType = data.ContentType;
-      let buffer = null;
+      let imageBuffer = null;
 
       switch (mimeType) {
         case MimeType.JPEG:
-          image.withoutEnlargement();
-
-          switch (command) {
-            case Command.CROP:
-              // No need to request crop vertices if no dimensions were specified
-
-              if (height === null && width === null) {
-                break;
-              }
-
-
-              // Get crop vertices from Google and transform the response into values that Sharp can use
-
-              const annotateImageResponse = await requestCropHints(data.Body, width, height);
-              const extractOptions = getExtractOptions(annotateImageResponse);
-
-              image.extract(extractOptions);
-
-              break;
-
-            case Command.DEFAULT:
-            default:
-              image.max();
-          }
-
-          if (height && width) {
-            image.resize(width, height);
-          }
-
-          buffer = await image
-            .toFormat('jpg')
-            .jpeg({ quality })
-            .toBuffer();
+          imageBuffer = await performCommand(data.Body, imageConfig);
 
           break;
 
@@ -145,7 +121,7 @@ function resizeImage(key) {
 
       await S3.putObject({
         ACL: 'public-read',
-        Body: buffer,
+        Body: imageBuffer,
         Bucket: BUCKET,
         CacheControl: 'public, max-age=31536000',
         ContentType: mimeType,
