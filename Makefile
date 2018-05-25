@@ -1,6 +1,6 @@
 .PHONY: all image package dist clean
 
-DOCKER_IMAGE=lambci/lambda:build-nodejs8.10
+DOCKER_IMAGE=iris:build
 
 all: package
 
