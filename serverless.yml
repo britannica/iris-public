@@ -15,13 +15,11 @@ service: iris
 
 plugins:
   - serverless-offline
-  - serverless-secrets-plugin
 
 custom:
   serverless-offline:
     stage: local
     location: src
-  secretsFilePathPrefix: config
   config: ${file(config/${self:provider.stage}.json)}
 
 provider:

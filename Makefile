@@ -1,19 +1,21 @@
 .PHONY: all image package dist clean
 
+DOCKER_IMAGE=lambci/lambda:build-nodejs8.10
+
 all: package
 
 image:
-	docker build --tag amazonlinux:nodejs .
+	docker build --tag ${DOCKER_IMAGE} .
 
 package: image
-	docker run --rm --volume ${PWD}/src:/build amazonlinux:nodejs npm install --production
+	docker run --rm --volume ${PWD}/src:/build ${DOCKER_IMAGE} npm install --production
 
 dist: clean_modules package
 	cd src && zip -FS -q -r ../dist/iris.zip *
 	sls package -v
 
 clean_modules:
-	rm -r src/node_modules
+	rm -rf src/node_modules
 
 clean: clean_modules
-	docker rmi --force amazonlinux:nodejs
+	docker rmi --force ${DOCKER_IMAGE}
