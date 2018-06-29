@@ -1,3 +1,8 @@
+# DEPRECATED! Please use the new private iris repo
+
+1. Delete your current local iris repo
+1. `git clone git@github.com:britannica/iris.git`
+
 # IRIS
 
 ### Description
